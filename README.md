@@ -1,3 +1,3 @@
 # Python_StepikSeleniumCource
 
-Homework repository for course https://stepik.org/course/72884
+Repository for Final Project for course https://stepik.org/course/72884
