@@ -21,10 +21,12 @@ def browser(request):
         options = Options()
         options.add_experimental_option('prefs', {'intl.accept_languages': language})
         browser = webdriver.Chrome(options=options)
-    else:
+    elif browser_name.lower() == "firefox":
         fp = webdriver.FirefoxProfile()
         fp.set_preference("intl.accept_languages", language)
         browser = webdriver.Firefox(firefox_profile=fp)
+    else:
+        raise Exception(f"Unknown browser name: {browser_name}. Choose chrome or firefox")
     browser.set_window_size(W_WIDTH, W_HEIGHT)
 
     yield browser

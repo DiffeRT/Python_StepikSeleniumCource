@@ -1,5 +1,5 @@
 from .base_page import BasePage
-from .locators import ProductPageLocators, MainPageLocators
+from .locators import ProductPageLocators
 
 
 class ProductPage(BasePage):
@@ -31,10 +31,3 @@ class ProductPage(BasePage):
 
     def should_be_success_message_disappeared(self):
         assert self.is_disappeared(*ProductPageLocators.SUCCESS_MESSAGE), "Success message is not disappeared"
-
-    def go_to_basket_page(self):
-        link = self.browser.find_element(*MainPageLocators.BASKET_LINK)
-        link.click()
-
-
-
