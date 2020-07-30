@@ -3,6 +3,44 @@ import pytest
 from .pages.basket_page import BasketPage
 from .pages.login_page import LoginPage
 from .pages.product_page import ProductPage
+from .pages.checkout_page import CheckOutPage
+
+
+class TestUserAddToBasketFromProductPage:
+    @pytest.fixture(scope="function", autouse=True)
+    def setup(self, browser):
+        link = "http://selenium1py.pythonanywhere.com/en-gb/accounts/login/"
+        page = LoginPage(browser, link)
+        page.open()
+        user_name = f"angmar-{str(time.time())}@mordor.org"
+        user_pwd = "angmar123!"
+        page.register_new_user(user_name, user_pwd)
+        page.should_be_authorized_user()
+        # yield
+        # удаляем те данные, которые мы создали
+
+    @pytest.mark.need_review
+    def test_user_can_add_product_to_basket(self, browser):
+        link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer0"
+        page = ProductPage(browser, link)
+        page.open()
+        page.add_item_to_basket()
+        page.solve_quiz_and_get_code()
+        page.should_be_added_successfully()
+
+    @pytest.mark.need_review_custom_scenarios
+    def test_user_can_add_product_to_wish_list(self, browser, get_language):
+        link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207"
+        page = ProductPage(browser, link)
+        page.open()
+        page.add_item_to_wishlist(get_language)
+        page.should_be_added_to_wishlist_successfully()
+
+    def test_user_cant_see_success_message(self, browser):
+        link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207"
+        page = ProductPage(browser, link)
+        page.open()
+        page.should_not_be_success_message()
 
 
 @pytest.mark.need_review
@@ -22,6 +60,50 @@ def test_guest_can_add_product_to_basket(browser, link):
     page.add_item_to_basket()
     page.solve_quiz_and_get_code()
     page.should_be_added_successfully()
+
+
+@pytest.mark.need_review
+def test_guest_can_go_to_login_page_from_product_page(browser):
+    link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-city-and-the-stars_95/"
+    page = ProductPage(browser, link)
+    page.open()
+    page.go_to_login_page()
+    login_page = LoginPage(browser, browser.current_url)
+    login_page.should_be_login_page()
+
+
+@pytest.mark.need_review
+def test_guest_cant_see_product_in_basket_opened_from_product_page(browser, get_language):
+    link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207"
+    page = ProductPage(browser, link)
+    page.open()
+    page.go_to_basket_page()
+    basket_page = BasketPage(browser, browser.current_url)
+    basket_page.should_be_empty(get_language)
+
+
+@pytest.mark.need_review_custom_scenarios
+def test_guest_cant_add_product_to_wish_list(browser, get_language):
+    link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207"
+    page = ProductPage(browser, link)
+    page.open()
+    page.should_be_disabled_adding_to_wishlist(get_language)
+
+
+@pytest.mark.xfail
+@pytest.mark.need_review_custom_scenarios
+def test_guest_can_finish_ordering(browser, get_language):
+    link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207"
+    page = ProductPage(browser, link)
+    page.open()
+    page.add_item_to_basket()
+    page.do_chekout_now()
+    checkout_page = CheckOutPage(browser, browser.current_url)
+    checkout_page.init_checkout_as_guest("guest@guest.com")
+    checkout_page.fill_shipping_address("Angmar", "AtMordor", "Mordor", "Minas Morgul", "194021", "RU")
+    checkout_page.fill_payment_method()
+    checkout_page.place_order()
+    checkout_page.should_be_confirmation(get_language)
 
 
 @pytest.mark.skip
@@ -54,52 +136,3 @@ def test_guest_should_see_login_link_on_product_page(browser):
     page = ProductPage(browser, link)
     page.open()
     page.should_be_login_link()
-
-
-@pytest.mark.need_review
-def test_guest_can_go_to_login_page_from_product_page(browser):
-    link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-city-and-the-stars_95/"
-    page = ProductPage(browser, link)
-    page.open()
-    page.go_to_login_page()
-    login_page = LoginPage(browser, browser.current_url)
-    login_page.should_be_login_page()
-
-
-@pytest.mark.need_review
-def test_guest_cant_see_product_in_basket_opened_from_product_page(browser, get_language):
-    link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207"
-    page = ProductPage(browser, link)
-    page.open()
-    page.go_to_basket_page()
-    basket_page = BasketPage(browser, browser.current_url)
-    basket_page.should_be_empty(get_language)
-
-
-class TestUserAddToBasketFromProductPage:
-    @pytest.fixture(scope="function", autouse=True)
-    def setup(self, browser):
-        link = "http://selenium1py.pythonanywhere.com/en-gb/accounts/login/"
-        page = LoginPage(browser, link)
-        page.open()
-        user_name = f"angmar-{str(time.time())}@mordor.org"
-        user_pwd = "angmar123!"
-        page.register_new_user(user_name, user_pwd)
-        page.should_be_authorized_user()
-        # yield
-        # удаляем те данные, которые мы создали
-
-    @pytest.mark.need_review
-    def test_user_can_add_product_to_basket(self, browser):
-        link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer0"
-        page = ProductPage(browser, link)
-        page.open()
-        page.add_item_to_basket()
-        page.solve_quiz_and_get_code()
-        page.should_be_added_successfully()
-
-    def test_user_cant_see_success_message(self, browser):
-        link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207"
-        page = ProductPage(browser, link)
-        page.open()
-        page.should_not_be_success_message()
