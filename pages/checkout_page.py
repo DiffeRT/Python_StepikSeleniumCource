@@ -5,6 +5,12 @@ from .locators import CheckOutPageLocators
 
 
 class CheckOutPage(BasePage):
+    confirmation_text = {
+        'en': "confirmation",
+        'ru': "сообщение с подтверждением",
+        'es': "de confirmación"
+    }
+
     def init_checkout_as_guest(self, email):
         self.browser.find_element(*CheckOutPageLocators.EMAIL_FIELD).send_keys(email)
         self.browser.find_element(*CheckOutPageLocators.AS_GUEST).click()
@@ -47,5 +53,5 @@ class CheckOutPage(BasePage):
 
     def should_be_confirmation(self, language):
         message = self.browser.find_element(*CheckOutPageLocators.CONFIRMATION).text
-        expected = "confirmation"
+        expected = self.confirmation_text[language]
         assert expected in message, "There is no confirmation message"
